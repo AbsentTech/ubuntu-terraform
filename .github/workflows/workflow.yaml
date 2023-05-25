@@ -58,16 +58,6 @@ jobs:
           echo '}' >> backend.tf
           terraform init
 
-      - name: Initialize Terraform
-        run: |
-          echo "backend \"s3\" {" > backend.tf
-          echo "  bucket = \"absent-terraform-remote-state-bucket\"" >> backend.tf
-          echo "  key    = \"s3temp/state.tfstate\"" >> backend.tf
-          echo "  region = \"${{ env.AWS_REGION }}\"" >> backend.tf
-          echo "  dynamodb_table = \"${{ env.DYNAMODB_TABLE }}\"" >> backend.tf
-          echo "  encrypt = true" >> backend.tf
-          echo "}" >> backend.tf
-          terraform init
 
       - name: Terraform Plan
         if: github.event_name == 'push'

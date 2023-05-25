@@ -1,0 +1,97 @@
+name: Terraform Deployment
+
+on:
+  push:
+    branches:
+      - main
+  delete:
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-2
+  TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
+  TF_VAR_proxmox_api_token_secret: ${{ secrets.PROXMOX_API_TOKEN_SECRET }}
+  TF_VAR_proxmox_api_url: ${{ secrets.PROXMOX_API_URL }}
+  TF_VAR_proxmox_api_token_id: ${{ secrets.PROXMOX_API_TOKEN_ID }}
+  TF_VAR_cipassword: ${{ secrets.CIPASSWORD }}
+  VM_NAME: ''
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Configure Tailscale
+        uses: tailscale/setup-tailscale@v1
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          version: latest
+      - name: Read Variable from credentials.auto.tfvars
+        id: read_variable
+        run: |
+          export VM_NAME=$(grep -oP '(?<=vm_name\s=\s")[^"]*' credentials.auto.tfvars)
+          echo "::set-env name=VM_NAME::$VM_NAME"
+
+      - name: Use Variable in Action
+        run: "echo My Variable: ${{ env.VM_NAME }}"
+
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Initialize Terraform
+        run: terraform init -backend-config="absent-terraform-remote-state-bucket" -backend-config="key=${{ env.VM_NAME }}/state.tfstate" -backend-config="region=${{ env.AWS_REGION }}"
+      - name: Initialize Terraform
+        run: |
+          terraform init \
+            -backend-config="absent-terraform-remote-state-bucket" \
+            -backend-config="key=${{ env.VM_NAME }}/state.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="dynamodb_table=terraform-remote-state-dynamo"
+      - name: Terraform Plan
+        if: github.event_name == 'push'
+        run: terraform plan 
+
+      - name: Apply Terraform Changes
+        if: github.event_name == 'push'
+        run: terraform apply -auto-approve 
+
+  destroy:
+    needs: deploy
+    if: github.event_name == 'delete' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Configure Tailscale
+        uses: tailscale/setup-tailscale@v1
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          version: latest
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Initialize Terraform
+        run: |
+          terraform init \
+            -backend-config="absent-terraform-remote-state-bucket" \
+            -backend-config="key=${{ env.VM_NAME }}/state.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="dynamodb_table=terraform-remote-state-dynamo"
+
+      - name: Destroy Terraform Resources
+        run: terraform destroy -auto-approve -var="variable1=${{ env.TF_VAR_variable1 }}" -var="variable2=${{ env.TF_VAR_variable2 }}"

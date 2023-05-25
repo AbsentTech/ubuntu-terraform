@@ -43,9 +43,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Initialize Terraform
-        run: terraform init -backend-config="absent-terraform-remote-state-bucket" -backend-config="key=${{ steps.read_property.outputs.VM_NAME }}/state.tfstate" -backend-config="region=${{ env.AWS_REGION }}"
+          
       - name: Initialize Terraform
         run: |
           echo "backend \"s3\" {" > backend.tf

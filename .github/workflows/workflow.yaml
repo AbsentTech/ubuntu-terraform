@@ -32,14 +32,7 @@ jobs:
             authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
    
 
-      - name: Read Property from credentials.tfvars
-        id: read_property
-        run: |
-          VM_NAME=$(grep -oP '(?<=property_name\s=\s")[^"]*' credentials.auto.tfvars)
-          echo "::set-output name=VM_NAME::$VM_NAME"
-
-      - name: Use Variable in Action
-        run: "echo My Variable: ${{ steps.read_property.outputs.VM_NAME }}"
+    
 
 
       - name: Configure AWS Credentials

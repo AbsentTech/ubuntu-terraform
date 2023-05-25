@@ -46,11 +46,14 @@ jobs:
         run: terraform init -backend-config="absent-terraform-remote-state-bucket" -backend-config="key=${{ steps.read_property.outputs.VM_NAME }}/state.tfstate" -backend-config="region=${{ env.AWS_REGION }}"
       - name: Initialize Terraform
         run: |
-          terraform init \
-            -backend-config="absent-terraform-remote-state-bucket" \
-            -backend-config="key=${{ env.VM_NAME }}/state.tfstate" \
-            -backend-config="region=${{ env.AWS_REGION }}" \
-            -backend-config="dynamodb_table=terraform-remote-state-dynamo"
+          echo "backend \"s3\" {" > backend.tf
+          echo "  bucket = \"my-s3-bucket\"" >> backend.tf
+          echo "  key    = \"path/to/state.tfstate\"" >> backend.tf
+          echo "  region = \"${{ env.AWS_REGION }}\"" >> backend.tf
+          echo "  dynamodb_table = \"${{ env.DYNAMODB_TABLE }}\"" >> backend.tf
+          echo "}" >> backend.tf
+          terraform init
+
       - name: Terraform Plan
         if: github.event_name == 'push'
         run: terraform plan 

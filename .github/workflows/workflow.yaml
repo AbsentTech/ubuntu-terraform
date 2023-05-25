@@ -31,6 +31,7 @@ jobs:
         uses: tailscale/github-action@v1
         with:
             authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+            version: 1.20.0
    
 
     
@@ -80,7 +81,7 @@ jobs:
         uses: tailscale/setup-tailscale@v1
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-          version: latest
+          version: 1.20.0
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1

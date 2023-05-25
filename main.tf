@@ -2,19 +2,7 @@
 # ---
 # Create a new VM from a clone
 
-terraform {
-  required_version = ">= 1.0.0"
 
-  backend "s3" {
-       # Replace this with your bucket name!
-      bucket = "absent-terraform-remote-state-bucket"
-      key = "terraform//terraform.tfstate"
-      region= "us-east-2"
-      # Replace this with your DynamoDB table name!
-      dynamodb_table = "terraform-remote-state-dynamo"
-      encrypt        = true
-     }
-} 
 
 variable "target_node" {
   type = string

@@ -53,7 +53,7 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
       - name: Terraform Plan
-        run: terraform plan -var="proxmox_api_url=${{ env.TF_VAR_proxmox_api_url }}" -var="proxmox_api_token_id=${{ secrets.PROXMOX_API_TOKEN_ID }}" -var="proxmox_api_token_secret=${{ secrets.PROXMOX_API_TOKEN_SECRET }}"
+        run: terraform plan -var="proxmox_api_url=https://10.1.2.10:8006/api2/json" -var="proxmox_api_token_id=${{ secrets.PROXMOX_API_TOKEN_ID }}" -var="proxmox_api_token_secret=${{ secrets.PROXMOX_API_TOKEN_SECRET }}"
       - name: Apply Terraform Changes
         if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
         run: terraform apply -auto-approve -var="proxmox_api_url=https://10.1.2.10:8006/api2/json" -var="proxmox_api_token_id=${{ secrets.PROXMOX_API_TOKEN_ID }}" -var="proxmox_api_token_secret=${{ secrets.PROXMOX_API_TOKEN_SECRET }}"

@@ -7,7 +7,7 @@ memory=4096 # Memory in MB (Default is 4096)
 disk_size="20G" # Disk size in GB (Default is 20G)
 network_tag = 5 # Replace with network tag (Default is 5)
 cloneTemplate = "UbuntuTemp" # Replace with template name (Default is UbuntuTemp) Make sure this template exists
-ipconfig0="ip=10.1.5.155/24,gw=10.1.2.1" # Replace with new IP (Replace with requested IP)
+ipconfig0="ip=10.1.5.188/24,gw=10.1.5.1" # Replace with new IP (Replace with requested IP)
 ciuser="absentadmin" # Replace with new username if needed (Default is absentadmin)
 #cipassword = "" If you want to set a password, uncomment this line and replace with password
 #proxmox_api_token_secret = "" If you want to use a token secret, uncomment this line and replace with token secret

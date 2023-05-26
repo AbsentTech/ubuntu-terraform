@@ -3,10 +3,13 @@ name: Terraform Deployment
 on:
   push:
     branches:
-      - main
-  delete:
-    branches:
-      - main
+      - staging
+  pull_request:
+    types:
+      - closed
+  issues:
+    types:
+      - closed
 
 env:
   AWS_REGION: us-east-2
@@ -18,32 +21,38 @@ env:
   DYNAMODB_TABLE: terraform-remote-state-dynamo
   VM_NAME: ''
 jobs:
-  deploy:
+  checkout-code:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-        
+  setup-tailscale:
+    needs: checkout-code
+    runs-on: ubuntu-latest
+    steps:
       - name: Connect Tailscale
-  # You may pin to the exact commit or the version.
-  # uses: tailscale/github-action@cc6818dd6930277a6e4b5d249e32ba2f4cf6ea32
         uses: tailscale/github-action@v1
         with:
             authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
             version: 1.20.0
-   
+          
+  aws-setup:
+    needs: setup-tailscale
+    runs-on: ubuntu-latest
 
-    
-
-
+    steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          
+
+
+  terraform-init:
+    needs: aws-setup
+    runs-on: ubuntu-latest
+    steps:
       - name: Initialize Terraform
         run: |
           echo 'terraform {' > backend.tf
@@ -58,45 +67,28 @@ jobs:
           echo '  }' >> backend.tf
           echo '}' >> backend.tf
           terraform init
-
-
+    
+  terraform-plan:
+    needs: terraform-init
+    runs-on: ubuntu-latest
+    steps:
       - name: Terraform Plan
         if: github.event_name == 'push'
         run: terraform plan 
 
+  terraform-apply:
+    needs: terraform-plan
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
       - name: Apply Terraform Changes
         if: github.event_name == 'push'
         run: terraform apply -auto-approve 
 
-  destroy:
-    needs: deploy
-    if: github.event_name == 'delete' && github.ref == 'refs/heads/main'
+  terraform-destroy:
+    needs: terraform-init
+    if: github.event.issue.closed_by != null && contains(github.event.issue.labels.*.name, 'Deprecated')
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      - name: Configure Tailscale
-        uses: tailscale/setup-tailscale@v1
-        with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-          version: 1.20.0
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Initialize Terraform
-        run: |
-          terraform init \
-            -backend-config="absent-terraform-remote-state-bucket" \
-            -backend-config="key=${{ env.VM_NAME }}/state.tfstate" \
-            -backend-config="region=${{ env.AWS_REGION }}" \
-            -backend-config="dynamodb_table=terraform-remote-state-dynamo"
-
       - name: Destroy Terraform Resources
-        run: terraform destroy -auto-approve -var="variable1=${{ env.TF_VAR_variable1 }}" -var="variable2=${{ env.TF_VAR_variable2 }}"
+        run: terraform destroy -auto-approve

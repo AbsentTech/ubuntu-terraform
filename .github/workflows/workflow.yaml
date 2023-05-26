@@ -51,8 +51,9 @@ jobs:
           echo '  }' >> backend.tf
           echo '}' >> backend.tf
           terraform init
+      - name: Terraform Validate
+        run: terraform validate
       - name: Terraform Plan
-        if: github.event_name == 'push'
         run: terraform plan 
       - name: Apply Terraform Changes
         if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'

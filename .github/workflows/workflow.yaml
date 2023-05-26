@@ -53,10 +53,10 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
       - name: Terraform Plan
-        run: terraform plan 
+        run: terraform plan -var="proxmox_api_url=${{ env.TF_VAR_proxmox_api_url }}" -var="proxmox_api_token_id=${{ secrets.PROXMOX_API_TOKEN_ID }}" -var="proxmox_api_token_secret=${{ secrets.PROXMOX_API_TOKEN_SECRET }}"
       - name: Apply Terraform Changes
         if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-        run: terraform apply -auto-approve 
+        run: terraform apply -auto-approve -var="proxmox_api_url=${{ env.TF_VAR_proxmox_api_url }}" -var="proxmox_api_token_id=${{ secrets.PROXMOX_API_TOKEN_ID }}" -var="proxmox_api_token_secret=${{ secrets.PROXMOX_API_TOKEN_SECRET }}"
       - name: Destroy Terraform Resources
         if: github.event.issue.closed_by != null && contains(github.event.issue.labels.*.name, 'Deprecated')
-        run: terraform destroy -auto-approve
+        run: terraform destroy -auto-approve -var="proxmox_api_url=${{ env.TF_VAR_proxmox_api_url }}" -var="proxmox_api_token_id=${{ secrets.PROXMOX_API_TOKEN_ID }}" -var="proxmox_api_token_secret=${{ secrets.PROXMOX_API_TOKEN_SECRET }}"

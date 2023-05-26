@@ -11,7 +11,7 @@ ipconfig0="ip=10.1.5.155/24,gw=10.1.2.1" # Replace with new IP (Replace with req
 ciuser="absentadmin" # Replace with new username if needed (Default is absentadmin)
 #cipassword = "" If you want to set a password, uncomment this line and replace with password
 #proxmox_api_token_secret = "" If you want to use a token secret, uncomment this line and replace with token secret
-vmid = -1  # VM ID (Default is -1 - Terraform will set this)
+vmid = 5000  # VM ID (Default is -1 - Terraform will set this)
 vm_description = "Terraform Test VM" # Description of VM (Default is Terraform Test VM) Using Markdown if necessary
 tags = "terraform, test, demo" # Comma separated list of tags
 #pool = "Terraform" Make sure this pool exists

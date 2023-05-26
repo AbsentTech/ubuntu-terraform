@@ -3,13 +3,15 @@ name: Terraform Deployment
 on:
   push:
     branches:
-      - staging
+      - main
   pull_request:
     types:
       - closed
-  issues:
-    types:
-      - closed
+  #delete branch named active-config
+  delete:
+    branches:
+      - active-config
+
 
 env:
   AWS_REGION: us-east-2
@@ -55,8 +57,8 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -var="proxmox_api_url=${{ vars.PROXMOX_API_URL }}" -var="proxmox_api_token_id=${{ secrets.PROXMOX_API_TOKEN_ID }}" -var="proxmox_api_token_secret=${{ secrets.PROXMOX_API_TOKEN_SECRET }}"
       - name: Apply Terraform Changes
-        if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+        if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'active-config'
         run: terraform apply -auto-approve -var="proxmox_api_url=${{ vars.PROXMOX_API_URL }}" -var="proxmox_api_token_id=${{ secrets.PROXMOX_API_TOKEN_ID }}" -var="proxmox_api_token_secret=${{ secrets.PROXMOX_API_TOKEN_SECRET }}"
       - name: Destroy Terraform Resources
-        if: github.event.issue.closed_by != null && contains(github.event.issue.labels.*.name, 'deprecated')
+        if:  github.event_name == 'delete' && github.ref == 'refs/heads/active-config'
         run: terraform destroy -auto-approve -var="proxmox_api_url=${{ vars.PROXMOX_API_URL }}" -var="proxmox_api_token_id=${{ secrets.PROXMOX_API_TOKEN_ID }}" -var="proxmox_api_token_secret=${{ secrets.PROXMOX_API_TOKEN_SECRET }}"

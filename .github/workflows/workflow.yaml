@@ -21,38 +21,22 @@ env:
   DYNAMODB_TABLE: terraform-remote-state-dynamo
   VM_NAME: ''
 jobs:
-  checkout-code:
+  run-terraform:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-  setup-tailscale:
-    needs: checkout-code
-    runs-on: ubuntu-latest
-    steps:
       - name: Connect Tailscale
         uses: tailscale/github-action@v1
         with:
             authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
             version: 1.20.0
-          
-  aws-setup:
-    needs: setup-tailscale
-    runs-on: ubuntu-latest
-
-    steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
-
-  terraform-init:
-    needs: aws-setup
-    runs-on: ubuntu-latest
-    steps:
       - name: Initialize Terraform
         run: |
           echo 'terraform {' > backend.tf
@@ -67,28 +51,12 @@ jobs:
           echo '  }' >> backend.tf
           echo '}' >> backend.tf
           terraform init
-    
-  terraform-plan:
-    needs: terraform-init
-    runs-on: ubuntu-latest
-    steps:
       - name: Terraform Plan
         if: github.event_name == 'push'
         run: terraform plan 
-
-  terraform-apply:
-    needs: terraform-plan
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-    runs-on: ubuntu-latest
-    steps:
       - name: Apply Terraform Changes
-        if: github.event_name == 'push'
+        if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
         run: terraform apply -auto-approve 
-
-  terraform-destroy:
-    needs: terraform-init
-    if: github.event.issue.closed_by != null && contains(github.event.issue.labels.*.name, 'Deprecated')
-    runs-on: ubuntu-latest
-    steps:
       - name: Destroy Terraform Resources
+        if: github.event.issue.closed_by != null && contains(github.event.issue.labels.*.name, 'Deprecated')
         run: terraform destroy -auto-approve

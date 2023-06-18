@@ -15,57 +15,36 @@ To get started with this template, follow these steps:
 
 1. Clone this repository to your local machine or download the ZIP file.
 2. Configure the Proxmox provider in your Terraform configuration file (e.g., `main.tf`). Make sure to provide the necessary authentication details and connection information.
-3. Customize the desired configuration for your virtual machines in the `variables.tf` file. You can adjust various parameters such as VM name, CPU, memory, storage, network, etc.
+3. Customize the desired configuration for your virtual machines in the `vmdetails.auto.tfvars` file. You can adjust various parameters such as VM name, CPU, memory, storage, network, etc.
 4. Optionally, modify the `main.tf` file to customize any additional resources you require (e.g., networks, storage, templates).
 5. Initialize the Terraform configuration by running `terraform init` in the repository's root directory.
 6. Review the plan by executing `terraform plan` to see the changes that will be applied.
 7. Apply the changes by running `terraform apply`. Confirm the changes when prompted.
 
-## Example Usage
 
-Below is an example of how to use this Terraform template to create a virtual machine in Proxmox:
-
-```hcl
-# main.tf
-
-terraform {
-  required_providers {
-    proxmox = {
-      source  = "proxmox/proxmox"
-      version = "2.2.1"
-    }
-  }
-}
-
-provider "proxmox" {
-  pm_api_url   = "https://your-proxmox-url:8006/api2/json"
-  pm_user      = "your-username"
-  pm_password  = "your-password"
-  pm_tls_insecure = true
-}
-
-module "virtual_machine" {
-  source  = "path/to/terraform-proxmox-virtual-machine"
-  vm_name = "my-vm"
-  vm_cpu  = 2
-  vm_memory = 4096
-  vm_disk_size = 20
-  # Add more parameters as needed
-}
-```
 
 ## Variables
 
-The following variables are available for customization in the `variables.tf` file:
+The following variables are available for customization in the `vmdetails.auto.tfvars` file:
 
-- `vm_name`: The name of the virtual machine.
-- `vm_cpu`: The number of virtual CPUs assigned to the virtual machine.
-- `vm_memory`: The amount of memory (in MB) allocated to the virtual machine.
-- `vm_disk_size`: The size of the virtual machine's disk (in GB).
-- `vm_os_template`: The ID or name of the Proxmox template to use for the virtual machine.
-- `vm_network_bridge`: The bridge to connect the virtual machine's network interface to.
-- `vm_ip_address`: The desired IP address for the virtual machine (optional).
-- `vm_ssh_public_key`: The SSH public key to be added to the virtual machine (optional).
+#proxmox_api_url = ""  # Your Proxmox IP Address Commented out as we are using the environment variable
+#proxmox_api_token_id = ""  # API Token ID Commented out as we are using the environment variable
+target_node="pve" # Replace with node name (Default is pve)
+vm_name="test-vm" # Replace with VM name (Make sure this name is unique)
+cores=2 # Number of cores (Default is 2)
+memory=4096 # Memory in MB (Default is 4096)
+disk_size="20G" # Disk size in GB (Default is 20G)
+network_tag = 5 # Replace with network tag (Default is 5)
+cloneTemplate = "UbuntuTemp" # Replace with template name (Default is UbuntuTemp) Make sure this template exists
+ipconfig0="ip=10.1.5.188/24,gw=10.1.5.1" # Replace with new IP (Replace with requested IP)
+ciuser="absentadmin" # Replace with new username if needed (Default is absentadmin)
+#cipassword = "" If you want to set a password, uncomment this line and replace with password
+#proxmox_api_token_secret = "" If you want to use a token secret, uncomment this line and replace with token secret
+vmid = 5000  # VM ID (Default is -1 - Terraform will set this)
+vm_description = "Terraform Test VM" # Description of VM (Default is Terraform Test VM) Using Markdown if necessary
+tags = "terraform, test, demo" # Comma separated list of tags
+#pool = "Terraform" Make sure this pool exists
+
 
 Feel free to modify or add additional variables based on your specific requirements.
 

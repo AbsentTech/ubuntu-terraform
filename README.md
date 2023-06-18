@@ -9,6 +9,14 @@ Before using this Terraform template, ensure that you have the following prerequ
 - Terraform (version 0.14 or above)
 - Proxmox Virtual Environment
 
+
+## Github Actions 
+There is a github actions workflow in place that you can use to generate the Vm's
+
+### Requirements
+The workflow uses terraform with remote state currently that is Aws DynamoDB
+To access the internal pve it also uses tailscale.
+
 ## Getting Started
 
 To get started with this template, follow these steps:

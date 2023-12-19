@@ -53,7 +53,7 @@ resource "proxmox_vm_qemu" "absentvm" {
   cipassword = var.cipassword
   
   # (Optional) Add your SSH KEY
-  #sshkeys = var.sshkey
+  sshkeys = var.sshkey
 
 
 }

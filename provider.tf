@@ -14,8 +14,18 @@ terraform {
   }
 }
 
+variable "proxmox_api_url" {
+  type = string
+  default = "https://10.1.2.2:8006/api2/json/"
+}
 
+variable "proxmox_api_token_id" {
+  type = string
+}
 
+variable "proxmox_api_token_secret" {
+  type = string
+}
 provider "proxmox" {
 
   pm_api_url          = var.proxmox_api_url

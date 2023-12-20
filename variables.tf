@@ -29,6 +29,12 @@ variable "cipassword" {
   
 }
 
+variable "storage_name" {
+  type = string
+  default = "abstore"
+  
+}
+
 variable "tags" {
   type = string
   default = "terraform,automation"

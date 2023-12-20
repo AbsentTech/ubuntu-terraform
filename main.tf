@@ -38,7 +38,7 @@ resource "proxmox_vm_qemu" "absentvm" {
   disk {
     size = var.disk_size
     type = "scsi"
-    storage = "local-lvm"
+    storage = var.storage_name
     cache = "writeback"
     iothread = 0
   }

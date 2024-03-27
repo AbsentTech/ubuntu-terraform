@@ -1,0 +1,26 @@
+openapi: 3.0.3
+info:
+  title: OpenAPI schema for template webservice
+components:
+  schemas:
+    variables:
+      required:
+        - image
+      type: object
+      properties:
+        image:
+          title: Image Name
+          type: string
+          description: Docker image name
+          x-walrus-ui:
+            group: Basic
+        ports:
+          title: Ports
+          type: array
+          description: Service ports to expose
+          default:
+            - 80
+          items:
+            type: number
+          x-walrus-ui:
+            group: Basic
